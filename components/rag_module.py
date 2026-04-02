@@ -23,13 +23,9 @@ class VectorDatabase:
 
     def ingest_from_json(self, json_path="data/historische_faelle.json"):
         """
-        Überführt den kuratierten Goldstandard aus einer JSON-Datei in den Vektorraum.
+        Delta-Load: Überführt den kuratierten Goldstandard aus einer JSON-Datei in den Vektorraum.
+        Prüft vorher, welche Fälle bereits in der DB existieren, und vektorisiert nur neue Einträge.
         """
-        # Vermeidung redundanter Indexierungen bei wiederholtem Skriptaufruf
-        if self.collection.count() > 0:
-            print(f"Indexierung übersprungen: ChromaDB enthält bereits {self.collection.count()} Datensätze.")
-            return
-
         if not os.path.exists(json_path):
             print(f"Fehler: Die definierte Quelldatei '{json_path}' ist nicht vorhanden.")
             return
@@ -38,17 +34,32 @@ class VectorDatabase:
         with open(json_path, 'r', encoding='utf-8') as f:
             daten = json.load(f)
 
+        # 1. Bereits vorhandene IDs aus ChromaDB abfragen (ohne die schweren Vektoren zu laden)
+        existing_data = self.collection.get(include=[]) 
+        existing_ids = set(existing_data["ids"])
+
+        # 2. Delta ermitteln: Nur Fälle filtern, deren ID noch nicht in der DB ist
+        neue_faelle = [fall for fall in daten if str(fall["fall_id"]) not in existing_ids]
+
+        if not neue_faelle:
+            print(f"INFO: Vektordatenbank ist aktuell. Es befinden sich bereits {self.collection.count()} Datensätze in der DB.")
+            return
+
+        print(f"INFO: {len(neue_faelle)} neue Fälle gefunden. Generiere Embeddings...")
+
         fall_ids = []
         texte = []
         metadaten_liste = []
 
-        for item in daten:
-            fall_ids.append(item["fall_id"])
+        # 3. Daten für ChromaDB aufbereiten
+        for item in neue_faelle:
+            # Wichtig: ChromaDB verlangt Strings als IDs
+            fall_ids.append(str(item["fall_id"]))
             
             # Der bereinigte Freitext dient als exklusive Vektorisierungsgrundlage
             texte.append(item["fehlerbemerkung"])
             
-            # ChromaDB erfordert flache Metadaten-Dictionaries (str, int, float, bool).
+            # ChromaDB erfordert flache Metadaten-Dictionaries. 
             # Komplexe Objekte werden daher als JSON-Strings serialisiert.
             meta = {
                 "metadaten": json.dumps(item.get("metadaten", {}), ensure_ascii=False),
@@ -57,25 +68,17 @@ class VectorDatabase:
             }
             metadaten_liste.append(meta)
 
-        self.add_historical_cases(fall_ids, texte, metadaten_liste)
-
-    def add_historical_cases(self, fall_ids, texts, metadaten_liste):
-        """
-        Führt das Embedding der Textdaten durch und persistiert Dokumente sowie Metadaten.
-        """
-        if self.collection.count() > 0:
-            return
-
-        print(f"Erstelle Embeddings für {len(texts)} Dokumente und transferiere in ChromaDB...")
-        embeddings = self.model.encode(texts).tolist()
+        # 4. Embeddings für die neuen Fälle berechnen
+        embeddings = self.model.encode(texte).tolist()
         
+        # 5. Neue Fälle zur ChromaDB hinzufügen
         self.collection.add(
             ids=fall_ids,
             embeddings=embeddings,
-            documents=texts,
+            documents=texte,
             metadatas=metadaten_liste
         )
-        print("Vektorisierung und Persistierung erfolgreich abgeschlossen.")
+        print(f"ERFOLG: {len(neue_faelle)} neue Fälle wurden der Vektordatenbank hinzugefügt. (Gesamtbestand: {self.collection.count()})")
 
     def get_top_k_similar(self, query_text, top_k=3):
         """
@@ -126,3 +129,7 @@ class VectorDatabase:
             print("Vektordatenbank wurde erfolgreich reinitialisiert.")
         except Exception as e:
             print(f"Fehler beim Reset der Datenbank: {e}")
+
+    
+    
+    

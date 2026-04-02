@@ -63,7 +63,7 @@ def main():
             for t in treffer:
                 kontext_liste.append({
                     "fall_id": t['fall_id'],
-                    "text": t['anonymisierter_freitext'],
+                    "text": t['fehlerbemerkung'],
                     "zielvariablen": t['zielvariablen'],
                     "cot_begruendung": t['cot_begruendung']
                 })
