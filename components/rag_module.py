@@ -15,11 +15,15 @@ class VectorDatabase:
         
         # Lokale Persistierung zur Gewährleistung der Data Governance (Privacy-by-Design)
         self.client = chromadb.PersistentClient(path=db_path)
-        self.collection = self.client.get_or_create_collection(name="historische_fehler")
+        #self.collection = self.client.get_or_create_collection(name="historische_fehler")
+        self.collection = self.client.get_or_create_collection(
+            name="historische_fehler", 
+            metadata={"hnsw:space": "cosine"}  # Zwingt ChromaDB zu Cosine Similarity
+        )
         
         # Verwendung eines multilingualen Modells, optimiert für deutschsprachigen Industrie-Jargon
         print("Initialisiere Embedding-Modell (paraphrase-multilingual-MiniLM-L12-v2)...")
-        self.model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+        self.model = SentenceTransformer('BAAI/bge-m3')
 
     def ingest_from_json(self, json_path="data/historische_faelle.json"):
         """

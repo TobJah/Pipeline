@@ -4398,5 +4398,27 @@
       "text_snippet": "Die neuen Hebepunkte (Revision F) wurden vom Engineering im 3D-Modell 15cm zu weit nach innen konstruiert. [...] Hochzeit gestoppt."
     },
     "cot_begruendung": "Falsch positionierte Hebepunkte im 3D-Modell sind ein massiver Konstruktionsfehler des Engineerings. Da das Fahrzeug nicht sicher gehoben werden kann, ist der wichtigste Meilenstein ('Hochzeit' mit den Drehgestellen) gestoppt. Dies ist der Inbegriff eines kritischen Blockers."
+  },
+  {
+    "fall_id": "201",
+    "fehlerbemerkung": "Betriff tganzen Zug 109 mehrere Mängel im Fussbodenbelag nach Versiegelung (Blasenbildung und Ablösungen). Vermutlich Trocknungszeit nach Versiegelung untershcritten oder fehler in Mischung.",
+    "metadaten": {
+      "projekt": "Projekt Gamma",
+      "wagen": "Wagen 02",
+      "stufe_1": "Außen",
+      "stufe_2": "Unterflur",
+      "stufe_3": "Unterflur Gesamt",
+      "stufe_4": "Rohbau",
+      "fehlerbezeichnung": "Kabelverlegung_Kabel",
+      "fehlerart": "klappert"
+    },
+    "zielvariablen": {
+      "ursache": "Verarbeitung",
+      "ursprung": "Werk",
+      "kritikalitaet": "Nacharbeit",
+      "serie": true,
+      "text_snippet": "Die neuen Hebepunkte (Revision F) wurden vom Engineering im 3D-Modell 15cm zu weit nach innen konstruiert. [...] Hochzeit gestoppt."
+    },
+    "cot_begruendung": "Falsch positionierte Hebepunkte im 3D-Modell sind ein massiver Konstruktionsfehler des Engineerings. Da das Fahrzeug nicht sicher gehoben werden kann, ist der wichtigste Meilenstein ('Hochzeit' mit den Drehgestellen) gestoppt. Dies ist der Inbegriff eines kritischen Blockers."
   }
 ]

@@ -45,16 +45,16 @@ def main():
         print("\n--- Initialisiere RAG-Modul ---")
         db = VectorDatabase()
 
+        db.reset_database()
+
         # Stellt sicher, dass die 100 synthetischen Kuratierungsfälle in ChromaDB liegen
         db.ingest_from_json("data/historische_faelle.json")
-
-        print("Führe semantische Suche für jeden Fehlerbericht durch...")
 
         # Hilfsfunktion, um den RAG-Kontext für eine einzelne Zeile abzurufen
         def get_rag_context(text):
             if not isinstance(text, str) or not text.strip():
                 return "[]"
-            
+
             # Ruft die Top-3-Treffer aus der Vektordatenbank ab
             treffer = db.get_top_k_similar(text, top_k=3)
 
